@@ -7,29 +7,57 @@
 #    http://shiny.rstudio.com/
 #
 
-library(shiny)
+source("sources.R")
 
 # Define UI for application that draws a histogram
+# ui <- fluidPage(
+# 
+#     # Application title
+#     titlePanel("Old Faithful Geyser Data"),
+# 
+#     # Sidebar with a slider input for number of bins
+#     sidebarLayout(
+#         sidebarPanel(
+#             sliderInput("bins",
+#                         "Number of bins:",
+#                         min = 1,
+#                         max = 50,
+#                         value = 30)
+#         ),
+# 
+#         # Show a plot of the generated distribution
+#         mainPanel(
+#            plotOutput("distPlot")
+#         )
+#     )
+# )
+
 ui <- fluidPage(
-
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
-
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-           plotOutput("distPlot")
-        )
+  
+  # Заголовок приложения
+  titlePanel("Управление оценками"),
+  
+  # Вкладки
+  tabsetPanel(
+    tabPanel("Загрузка оценок", 
+             upload()
+    ),
+    tabPanel("Создание/Редактирование журнала и сохранение",
+             editing()
+    ),
+    tabPanel("Статистика (Таблица)", 
+             statTable()
+    ),
+    tabPanel("Статистика (График)", 
+             statGraph()
+    ),
+    tabPanel("Помощь", 
+             help_P()
+    ),
+    tabPanel("О программе", 
+             about()
     )
+  )
 )
 
 # Define server logic required to draw a histogram

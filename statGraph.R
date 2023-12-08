@@ -1,0 +1,4 @@
+statGraph = function()
+{
+  
+}

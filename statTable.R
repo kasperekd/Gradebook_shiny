@@ -1,0 +1,4 @@
+statTable = function()
+{
+  
+}
