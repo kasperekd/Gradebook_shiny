@@ -1,4 +1,5 @@
-library(shiny)
+#source("libs.R")
+
 source("upload.R")
 source("statTable.R")
 source("statGraph.R")
