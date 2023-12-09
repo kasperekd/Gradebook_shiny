@@ -10,15 +10,15 @@ ui <- fluidPage(
   # Вкладки
   tabsetPanel(
     tabPanel("Загрузка оценок", 
-             upload(),
-             uiOutput("fileList")
+             upload()#,
+             #uiOutput("fileList")
     ),
     tabPanel("Создание/Редактирование журнала и сохранение",
              editing()
     ),
     tabPanel("Статистика (Таблица)", 
-             #statTable()
-             DT::dataTableOutput("table")
+             statTable()
+             #DT::dataTableOutput("table")
              # tableOutput("table")
     ),
     tabPanel("Статистика (График)", 

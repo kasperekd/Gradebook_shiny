@@ -1,18 +1,30 @@
 upload = function()
 {
   rt = list(
-    fileInput("files", "Выберите файлы  .csv для загрузки", multiple = TRUE, accept = c('.csv', '.txt', '.xlsx')),
-    selectInput("encoding", "Выберите кодировку:",
-                choices = c("Windows-1251", "UTF-8")),
-    actionButton("deleteButton", "Удалить выбранный файл")
-
+    fluidRow(
+      column(width = 4,
+             fileInput("files", "Загрузка фалов", multiple = TRUE, accept = c('.csv', '.txt', '.xlsx')),
+             selectInput("encoding", "Кодировка:", choices = c("Windows-1251", "UTF-8"))
+      ),
+      column(width = 4,align = "right",
+             tableOutput("fileTable")
+      ),
+      column(width = 4, align = "left",
+             selectInput("fileSelection", "Выбор файла", choices = NULL),
+             actionButton("deleteButton", "Удалить"),
+             actionButton("selectButton", "Выбрать"),
+             #textOutput("output$text1"),
+             mainPanel(textOutput("fileSelected"))
+      )
+    )
   )
   return(rt)
 }
 
+#assign(selFILE1, NULL, envir = .GlobalEnv)
+
 upload_server = function(input, output, session)
 {
-  
   observeEvent(input$files, {
     if (!is.null(input$files)) {
       if (!dir.exists("./uploaded_files")) {
@@ -24,6 +36,7 @@ upload_server = function(input, output, session)
         file.copy(input$files$datapath[i], new_file_path)
       }
       updateFilesList()
+      updateFilesTable()
     }
   })
   
@@ -31,14 +44,46 @@ upload_server = function(input, output, session)
     fileList <- list.files("./uploaded_files", pattern="\\.(csv|txt|xlsx)$", full.names = FALSE)
     updateSelectInput(session, "fileSelection", choices = fileList)
   }
+  updateFilesTable <- function() {
+    fileList <- list.files("./uploaded_files", pattern="\\.(csv|txt|xlsx)$", full.names = FALSE)
+    output$fileTable <- renderTable({
+      data.frame(Файлы = fileList, check.names = FALSE)
+    })
+  }
   
-  output$fileList <- renderUI({
-    updateFilesList()
-    selectInput("fileSelection", "Выберите файл для удаления:", choices = NULL)
+  
+  updateFilesList()
+  updateFilesTable()
+  #session$set("file_selected", input$fileSelection)
+  #output$text1 <- renderText({paste("You have selected", input$fileSelection)})
+  #selFILE <- paste0("./uploaded_files/")
+  selFILE1 = "./uploaded_files/example (1)(3) — копия.csv"
+  
+  observeEvent(input$selectButton, {
+    fileList <- list.files("./uploaded_files", pattern="\\.(csv|txt|xlsx)$", full.names = FALSE)
+    if (length(fileList) == 0) {
+      showNotification("Список файлов пуст", type = "warning")
+    } else {
+      if (!is.null(input$fileSelection)) 
+      {
+        
+        output$fileSelected <- renderText({paste0("./uploaded_files/", input$fileSelection)})
+        #selFILE <- paste0("./uploaded_files/", input$fileSelection)
+        assign(selFILE1, paste0("./uploaded_files/", input$fileSelection)) 
+        #session$set("file_selected", output$fileSelection)
+        # output$fileSelected = renderText(paste0("./uploaded_files/",fileToSelect, collapse = NULL))  
+        # print(class(input$fileSelection))
+        # print(input$fileSelection)
+         #print(output$text1)
+        
+        #print(class(input$files))
+      }
+    }
   })
   
+  
   observeEvent(input$deleteButton, {
-    fileList <- list.files("./uploaded_files", pattern="*.csv", full.names = FALSE)
+    fileList <- list.files("./uploaded_files", pattern="\\.(csv|txt|xlsx)$", full.names = FALSE)
     if (length(fileList) == 0) {
       showNotification("Список файлов пуст", type = "warning")
     } else {
@@ -62,6 +107,9 @@ upload_server = function(input, output, session)
     fileToRemove <- file.path("./uploaded_files", input$fileSelection)
     file.remove(fileToRemove)
     updateFilesList()
+    updateFilesTable()
     removeModal()
   })
+  
+  return(selFILE1)
 }
