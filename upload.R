@@ -1,7 +1,7 @@
 upload = function()
 {
   rt = list(
-    fileInput("files", "Выберите файлы  .csv для загрузки", multiple = TRUE),
+    fileInput("files", "Выберите файлы  .csv для загрузки", multiple = TRUE, accept = c('.csv', '.txt', '.xlsx')),
     selectInput("encoding", "Выберите кодировку:",
                 choices = c("Windows-1251", "UTF-8")),
     actionButton("deleteButton", "Удалить выбранный файл")
@@ -28,7 +28,7 @@ upload_server = function(input, output, session)
   })
   
   updateFilesList <- function() {
-    fileList <- list.files("./uploaded_files", pattern="*.csv", full.names = FALSE)
+    fileList <- list.files("./uploaded_files", pattern="\\.(csv|txt|xlsx)$", full.names = FALSE)
     updateSelectInput(session, "fileSelection", choices = fileList)
   }
   
