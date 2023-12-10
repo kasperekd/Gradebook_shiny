@@ -4,9 +4,9 @@ source("sources.R")
 source("ui.R")
 server <- function(input, output, session) 
 {
-  selected = upload_server(input, output, session)
+  upload_server(input, output, session)
   
-  statTable_server(input, output, session, selected)
+  statTable_server(input, output, session)
   
   
   # output$table <- renderTable({

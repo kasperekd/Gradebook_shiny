@@ -12,16 +12,21 @@ upload = function()
       column(width = 4, align = "left",
              selectInput("fileSelection", "Выбор файла", choices = NULL),
              actionButton("deleteButton", "Удалить"),
-             actionButton("selectButton", "Выбрать"),
-             #textOutput("output$text1"),
-             mainPanel(textOutput("fileSelected"))
+             actionButton("selectButton", "Выбрать")
       )
     )
   )
   return(rt)
 }
 
-#assign(selFILE1, NULL, envir = .GlobalEnv)
+getSelected = function(input, output)
+{
+  if (!is.null(textOutput("fileSelected"))) 
+  {
+    return(textOutput("fileSelected"))
+  }
+  return(NULL)
+}
 
 upload_server = function(input, output, session)
 {
@@ -54,33 +59,6 @@ upload_server = function(input, output, session)
   
   updateFilesList()
   updateFilesTable()
-  #session$set("file_selected", input$fileSelection)
-  #output$text1 <- renderText({paste("You have selected", input$fileSelection)})
-  #selFILE <- paste0("./uploaded_files/")
-  selFILE1 = "./uploaded_files/example (1)(3) — копия.csv"
-  
-  observeEvent(input$selectButton, {
-    fileList <- list.files("./uploaded_files", pattern="\\.(csv|txt|xlsx)$", full.names = FALSE)
-    if (length(fileList) == 0) {
-      showNotification("Список файлов пуст", type = "warning")
-    } else {
-      if (!is.null(input$fileSelection)) 
-      {
-        
-        output$fileSelected <- renderText({paste0("./uploaded_files/", input$fileSelection)})
-        #selFILE <- paste0("./uploaded_files/", input$fileSelection)
-        assign(selFILE1, paste0("./uploaded_files/", input$fileSelection)) 
-        #session$set("file_selected", output$fileSelection)
-        # output$fileSelected = renderText(paste0("./uploaded_files/",fileToSelect, collapse = NULL))  
-        # print(class(input$fileSelection))
-        # print(input$fileSelection)
-         #print(output$text1)
-        
-        #print(class(input$files))
-      }
-    }
-  })
-  
   
   observeEvent(input$deleteButton, {
     fileList <- list.files("./uploaded_files", pattern="\\.(csv|txt|xlsx)$", full.names = FALSE)
@@ -110,6 +88,4 @@ upload_server = function(input, output, session)
     updateFilesTable()
     removeModal()
   })
-  
-  return(selFILE1)
 }
