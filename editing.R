@@ -2,25 +2,23 @@ source("upload.R")
 library(readxl)
 library(DataEditR)
 
-editing = function()
+editing <- function()
 {
-  rt = list(
+  rt <- list(
     fluidRow(
-      
-        actionButton("addButton", "Добавить"),
-        actionButton("addButton", "Добавить"),
-      
-        DT::dataTableOutput("table")
+      actionButton("addButton", "Добавить"),
+      dataOutputUI("output-1"),
+      dataEditUI("edit-1")
     )
   )
   return(rt)
 }
 
-selected = NULL
+selected <- NULL
 
-editing_server = function(input, output, session)
+editing_server <- function(input, output, session)
 {
-  data <- reactiveVal(NULL)
+  dataT <- reactiveVal(NULL)
   
   observeEvent(input$selectButton, {
     fileList <- list.files("./uploaded_files", pattern="\\.(csv|txt|xlsx)$", full.names = FALSE)
@@ -29,7 +27,7 @@ editing_server = function(input, output, session)
     } else {
       if (!is.null(input$fileSelection)) 
       {
-        readTable(input, output, session, data)
+        readTable(input, output, session, dataT)
       }
     }
   })
@@ -41,11 +39,11 @@ editing_server = function(input, output, session)
         textInput("name", "Имя"),
         textInput("patronymic", "Отчество"),
         textInput("class", "Класс"),
-        textInput("informatics", "Информатика"),
-        textInput("physics", "Физика"),
-        textInput("mathematics", "Математика"),
-        textInput("literature", "Литература"),
-        textInput("music", "Музыка"),
+        numericInput("informatics", "Информатика", 0),
+        numericInput("physics", "Физика", 0),
+        numericInput("mathematics", "Математика", 0),
+        numericInput("literature", "Литература", 0),
+        numericInput("music", "Музыка", 0),
         footer = tagList(
           actionButton("addStudent", "Добавить"),
           modalButton("Отмена")
@@ -55,28 +53,28 @@ editing_server = function(input, output, session)
   })
   
   observeEvent(input$addStudent, {
-    cols <- colnames(data())
+    cols <- colnames(dataT())
     newStudent <- data.frame(
-      name = paste(input$name, input$surname, input$patronymic, sep = " "),
+      name = paste(input$surname, input$name, input$patronymic, sep = " "),
       class = input$class,
-      informatics = as.character(input$informatics),
-      physics = as.character(input$physics),
-      mathematics = as.character(input$mathematics),
-      literature = as.character(input$literature),
-      music = as.character(input$music)
+      informatics = input$informatics,
+      physics = input$physics,
+      mathematics = input$mathematics,
+      literature = input$literature,
+      music = input$music
     )
-    if (is.null(data())) {
-      data(data.frame(newStudent))
+    if (is.null(dataT())) {
+      dataT(data.frame(newStudent))
     } 
     else {
-      common <- intersect(colnames(data()), colnames(newStudent))
-      data<- rbind(data()[common], newStudent[common])
-      data(data)
+      common <- intersect(colnames(dataT()), colnames(newStudent))
+      dataT <- rbind(dataT()[common], newStudent[common])
+      dataT(dataT)
     }
     removeModal()
   })
   
-  readTable = function(input, output, session, data)
+  readTable <- function(input, output, session, data)
   {
     selected <- paste0("./uploaded_files/", input$fileSelection) 
     if (tools::file_ext(selected) %in% c("txt", "csv")) {
@@ -84,13 +82,11 @@ editing_server = function(input, output, session)
     } else if (tools::file_ext(selected) == "xlsx") {
       df <- readxl::read_xlsx(selected)
     }
-    data(df)
+    dataT(df)
   }
   
-  output$table <- DT::renderDataTable({
-    if (!is.null(data()))
-    {
-      DT::datatable(data(), options = list(columnDefs = list(list(orderable = TRUE, targets = 0))))
-    }
-  })
+  data_to_edit <- reactive({ dataT() })  # Assign the existing table dataT to data_to_edit
+  data_edit <- dataEditServer("edit-1", data = data_to_edit)
+  dataOutputServer("output-1", data = data_edit)
+  
 }
