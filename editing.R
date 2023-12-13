@@ -1,4 +1,5 @@
 source("upload.R")
+library(readxl)
 
 editing = function()
 {
@@ -18,17 +19,26 @@ editing_server = function(input, output, session)
     } else {
       if (!is.null(input$fileSelection)) 
       {
-        selected <- paste0("./uploaded_files/", input$fileSelection)
-        print(selected)
-        data <- readr::read_delim(selected ,delim = ';', locale = readr::locale(encoding = input$encoding),show_col_types = FALSE)
-        output$table <- DT::renderDataTable({
-          if (!is.null(selected))
-          {
-            df <- data
-            DT::datatable(df, options = list(columnDefs = list(list(orderable = TRUE, targets = 0))))
-          }
-        })
+        readTable(input, output, session)
       }
+    }
+  })
+}
+
+readTable = function(input, output, session)
+{
+  selected <- paste0("./uploaded_files/", input$fileSelection) # будет содержать: ./uploaded_files/(file_name).(csv/txt/xlsx)
+  #print(selected)
+  if (tools::file_ext(selected) %in% c("txt", "csv")) {
+    data <- readr::read_delim(selected, delim = ';', locale = readr::locale(encoding = input$encoding), show_col_types = FALSE)
+  } else if (tools::file_ext(selected) == "xlsx") {
+    data <- readxl::read_xlsx(selected)
+  }
+  output$table <- DT::renderDataTable({
+    if (!is.null(selected))
+    {
+      df <- data
+      DT::datatable(df, options = list(columnDefs = list(list(orderable = TRUE, targets = 0))))
     }
   })
 }
