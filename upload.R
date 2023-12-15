@@ -3,8 +3,8 @@ upload = function()
   rt = list(
     fluidRow(
       column(width = 4,
-             fileInput("files", "Загрузка фалов", multiple = TRUE, accept = c('.csv', '.txt', '.xlsx')),
-             selectInput("encoding", "Кодировка:", choices = c("Windows-1251", "UTF-8"))
+             fileInput("files", "Загрузка фалов", multiple = TRUE, accept = c('.csv', '.txt', '.xlsx'))
+             #selectInput("encoding", "Кодировка:", choices = c("Windows-1251", "UTF-8"))
       ),
       column(width = 4,align = "right",
              tableOutput("fileTable")
@@ -19,23 +19,14 @@ upload = function()
   return(rt)
 }
 
-getSelected = function(input, output)
-{
-  if (!is.null(textOutput("fileSelected"))) 
-  {
-    return(textOutput("fileSelected"))
-  }
-  return(NULL)
-}
-
 upload_server = function(input, output, session)
 {
   observeEvent(input$files, {
     if (!is.null(input$files)) {
       if (!dir.exists("./uploaded_files")) {
         dir.create("./uploaded_files")
-      }
-      for (i in 1:length(input$files$datapath)) {
+      } 
+      for (i in 1:length(input$files$datapath)) { #ВОЗМОЖНО ОШИБКА "неправильное количество измерений"
         file_name <- basename(input$files$name[i])
         new_file_path <- file.path("./uploaded_files", file_name)
         file.copy(input$files$datapath[i], new_file_path)

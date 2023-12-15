@@ -1,14 +1,19 @@
 source("upload.R")
 library(readxl)
 library(DataEditR)
+library(readr)
+library(openxlsx)
 
 editing <- function()
 {
   rt <- list(
     fluidRow(
       actionButton("addButton", "Добавить"),
-      dataOutputUI("output-1"),
-      dataEditUI("edit-1")
+      downloadButton("downloadButton", "Скачать измененный файл"),
+      actionButton("saveButton", "Сохранить изменения"),
+      # dataFilterUI("edit-1"),
+      dataEditUI("edit_1")
+      #data_edit(dataEditUI("edit-1"))
     )
   )
   return(rt)
@@ -19,15 +24,51 @@ selected <- NULL
 editing_server <- function(input, output, session)
 {
   dataT <- reactiveVal(NULL)
-  
+ 
+
   observeEvent(input$selectButton, {
-    fileList <- list.files("./uploaded_files", pattern="\\.(csv|txt|xlsx)$", full.names = FALSE)
-    if (length(fileList) == 0) {
-      showNotification("Список файлов пуст", type = "warning")
-    } else {
-      if (!is.null(input$fileSelection)) 
-      {
-        readTable(input, output, session, dataT)
+    tryCatch({
+      fileList <- list.files("./uploaded_files", pattern="\\.(csv|txt|xlsx)$", full.names = FALSE)
+      if (length(fileList) == 0) {
+        showNotification("Список файлов пуст", type = "warning")
+      } else {
+        if (!is.null(input$fileSelection)) 
+        {
+          readTable(input, output, session, dataT)
+        }
+      }
+    }, error = function(e) {
+      dataT(NULL)
+      print("Ошибка при открытии файла")
+    })
+  })
+  
+  output$downloadButton <- downloadHandler(
+    filename = function() {
+      paste("edited_file", tools::file_ext(input$fileSelection), sep = ".")
+    },
+    content = function(file) {
+      edited_data <- data_edit()  # Получение измененных данных
+      #edited_data <- dataT()  # Получение измененных данных
+      if (tools::file_ext(input$fileSelection) %in% c("txt", "csv")) {
+        write.table(edited_data, file, sep = ";", row.names = FALSE, col.names = TRUE, quote = FALSE)  # Сохранение измененных данных в файл
+        #write.table(edited_data, file, sep = ";", row.names = FALSE, col.names = TRUE, quote = FALSE, fileEncoding = as.character(guess_encoding(selected)[1, "encoding"]))  # Сохранение измененных данных в файл
+      } else if (tools::file_ext(input$fileSelection) == "xlsx") {
+        #write.xlsx(edited_data, file, row.names = FALSE)  # Сохранение измененных данных в файл
+        openxlsx::write.xlsx(edited_data, file.path("./uploaded_files", file_name))
+      }
+    }
+  )
+  
+  observeEvent(input$saveButton, {
+    if (!is.null(input$fileSelection)) {
+      edited_data <- data_edit()  # Получение измененных данных
+      file_name <- basename(input$fileSelection)  # Получение изначального имени файла
+      if (tools::file_ext(file_name) %in% c("txt", "csv")) {
+        write.table(edited_data, file.path("./uploaded_files", file_name), sep = ";", row.names = FALSE, col.names = TRUE, quote = FALSE)  # Сохранение измененных данных в файл
+      } else if (tools::file_ext(file_name) == "xlsx") {
+        openxlsx::write.xlsx(edited_data, file.path("./uploaded_files", file_name))
+        #write.xlsx(edited_data, file.path("./uploaded_files", file_name), row.names = FALSE)  # Сохранение измененных данных в файл
       }
     }
   })
@@ -74,19 +115,26 @@ editing_server <- function(input, output, session)
     removeModal()
   })
   
-  readTable <- function(input, output, session, data)
+  readTable <- function(input, output, session, dataT)
   {
-    selected <- paste0("./uploaded_files/", input$fileSelection) 
+    selected <- paste0("./uploaded_files/", input$fileSelection)
     if (tools::file_ext(selected) %in% c("txt", "csv")) {
-      df <- readr::read_delim(selected, delim = ';', locale = readr::locale(encoding = input$encoding), show_col_types = FALSE)
+      print( as.character(guess_encoding(selected)[1, "encoding"]))
+      tryCatch({
+        df <- readr::read_delim(selected, delim = ';', locale = readr::locale(encoding = as.character(guess_encoding(selected)[1, "encoding"])), show_col_types = FALSE)
+      }, error = function(e) {
+        print("Ошибка при чтении файла")
+      })
     } else if (tools::file_ext(selected) == "xlsx") {
-      df <- readxl::read_xlsx(selected)
+      tryCatch({
+        df <- readxl::read_xlsx(selected)
+      }, error = function(e) {
+        print("Ошибка при чтении файла")
+      })
     }
     dataT(df)
   }
-  
+
   data_to_edit <- reactive({ dataT() })  # Assign the existing table dataT to data_to_edit
-  data_edit <- dataEditServer("edit-1", data = data_to_edit)
-  dataOutputServer("output-1", data = data_edit)
-  
+  data_edit <- dataEditServer("edit_1", data = data_to_edit)
 }
