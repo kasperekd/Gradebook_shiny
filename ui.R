@@ -3,7 +3,6 @@
 source("sources.R")
 
 ui <- fluidPage(
-  
   # Заголовок приложения
   titlePanel("Журнал"),
   

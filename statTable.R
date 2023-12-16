@@ -6,13 +6,13 @@ statTable = function()
 {
   rt <- list(
     fluidRow(
-      column(width = 6,
-        h3("Статистика по классам"),
-        tableOutput("classStatsTable")
+      column(width = 6, style="min-width: 49vw; max-width: 50vw;",
+             h3("Статистика по классам"),
+             tableOutput("classStatsTable")
       ),
-      column(width = 6,
-        h3("Статистика учеников"),
-        tableOutput("studentStatsTable")
+      column(width = 6, style="min-width: 49vw; max-width: 50vw;",
+             h3("Статистика по предметам"),
+             tableOutput("subjectStatsTable")
       )
     )
   )
@@ -25,6 +25,7 @@ statTable_server = function(input, output, session)
   observeEvent(input$selectButton, {
     data <- dataT()
     classStats <- calculateClassStats(data)
+    subjectStats <- calculateSubjectStats(data)
     
     output$classStatsTable <- renderUI({
       class_tables <- lapply(unique(classStats$class), function(class_name) {
@@ -40,7 +41,32 @@ statTable_server = function(input, output, session)
       })
       HTML(paste(class_tables, collapse = "\n"))
     })
+    
+    output$subjectStatsTable <- renderUI({
+      subject_table <- paste("<h4>Всего учеников:", nrow(dataT()), "</h4>", kable(subjectStats, "html") %>%
+                               kable_styling(full_width = F))
+      HTML(subject_table)
+    })
   })
+}
+
+calculateSubjectStats <- function(data) {
+  data_df <- as.data.frame(data, stringsAsFactors = FALSE)
+  
+  subject_stats <- data_df %>%
+    gather(subject, grade, -name, -class) %>%
+    group_by(subject) %>%
+    summarise(
+      `Средняя оценка` = mean(as.numeric(grade), na.rm = TRUE),
+      `Медианная оценка` = median(as.numeric(grade), na.rm = TRUE),
+      `%1` = sum(grade == "1") / n() * 100,
+      `%2` = sum(grade == "2") / n() * 100,
+      `%3` = sum(grade == "3") / n() * 100,
+      `%4` = sum(grade == "4") / n() * 100,
+      `%5` = sum(grade == "5") / n() * 100
+    )
+  
+  return(subject_stats)
 }
 
 calculateClassStats <- function(data) {
@@ -59,9 +85,10 @@ calculateClassStats <- function(data) {
       `%2` = sum(grade == "2") / n() * 100,
       `%3` = sum(grade == "3") / n() * 100,
       `%4` = sum(grade == "4") / n() * 100,
-      `%5` = sum(grade == "5") / n() * 100
+      `%5` = sum(grade == "5") / n() * 100,
+      .groups = 'drop'
     ) #%>%
-    #mutate(class = ifelse(row_number() == 1, class, ""))  # Insert class name every 5 rows
+  #mutate(class = ifelse(row_number() == 1, class, ""))  # Insert class name every 5 rows
   
   stats_renamed <- stats %>%
     rename(`Предмет` = subject)
