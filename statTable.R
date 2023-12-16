@@ -1,15 +1,18 @@
 source("editing.R")
-library("tidyr")
+library(tidyr)
+library(kableExtra)
 
 statTable = function()
 {
   rt <- list(
     fluidRow(
-      h3("Class-wise Statistics"),
-      tableOutput("classStatsTable"),
-      br(),
-      h3("Overall Statistics"),
-      tableOutput("overallStatsTable")
+      column(width = 6,
+        h3("Class-wise Statistics"),
+        tableOutput("classStatsTable")
+      ),
+      column(width = 6,
+        h3("Class-wise Statistics")
+      )
     )
   )
   return(rt)
@@ -18,61 +21,45 @@ statTable = function()
 statTable_server = function(input, output, session)
 {
   
-  # observeEvent(input$selectButton, {
-  #   output$out <- renderTable({
-  #     data.frame(dataT(), check.names = FALSE)
-  #   })
-  # })
-  # 
-  
-  
   observeEvent(input$selectButton, {
     data <- dataT()
     classStats <- calculateClassStats(data)
-    overallStats <- calculateOverallStats(data)
     
-    output$classStatsTable <- renderTable({
-      classStats
-    })
-    
-    output$overallStatsTable <- renderTable({
-      overallStats
+    output$classStatsTable <- renderUI({
+      class_tables <- lapply(unique(classStats$class), function(class_name) {
+        class_data <- classStats[classStats$class == class_name, ]
+        total_students <- class_data$count[1]  # Используем значение count для каждого класса
+        class_table <- paste("<h4>Class:", class_name, "- Total Students:", total_students, "</h4>", kable(subset(class_data, select = -c(class, count)), "html") %>%
+                               kable_styling(full_width = F))
+        if (class_name != unique(classStats$class)[length(unique(classStats$class))]) {
+          class_table <- paste(class_table, " ")  # Add a horizontal line after each class table
+        }
+        return(class_table)
+      })
+      HTML(paste(class_tables, collapse = "\n"))
     })
   })
+}
+
+calculateClassStats <- function(data) {
+  # Преобразование входных данных в удобный формат
+  data_df <- as.data.frame(data, stringsAsFactors = FALSE)
   
-}
-
-calculateClassStats = function(data) {
-  classStats <- by(data, data$class, function(subdata) {
-    stats <- sapply(subdata[, -c(1, 2)], function(x) {
-      avg <- mean(x)
-      med <- median(x)
-      count <- length(x)
-      percent <- mean(x > 50) * 100  # Assuming percentage of students with score > 50
-      c(Average = avg, Median = med, Count = count, Percent = percent)
-    })
-    stats <- t(stats)
-    colnames(stats) <- c("Average", "Median", "Count", "Percent")
-    stats <- format(stats, digits = 2, nsmall = 2)
-    classStats <- data.frame(Class = as.character(subdata$class[1]), stats)
-    return(classStats)
-  })
-  classStats <- do.call(rbind, classStats)
-  return(classStats)
-}
-
-# Function to calculate statistics for all students across all classes for each subject
-calculateOverallStats = function(data) {
-  overallStats <- sapply(data[, -c(1, 2)], function(x) {
-    avg <- mean(x)
-    med <- median(x)
-    count <- length(x)
-    percent <- mean(x > 50) * 100  # Assuming percentage of students with score > 50
-    c(Average = avg, Median = med, Count = count, Percent = percent)
-  })
-  overallStats <- t(overallStats)
-  colnames(overallStats) <- c("Average", "Median", "Count", "Percent")
-  overallStats <- format(overallStats, digits = 2, nsmall = 2)
-  overallStats <- as.data.frame(overallStats)
-  return(overallStats)
+  # Расчет статистики для каждого класса и предмета
+  stats <- data_df %>%
+    gather(subject, grade, -name, -class) %>%
+    group_by(class, subject) %>%
+    summarise(
+      average = mean(as.numeric(grade), na.rm = TRUE),
+      median = median(as.numeric(grade), na.rm = TRUE),
+      count = n(),
+      percent_1 = sum(grade == "1") / n() * 100,
+      percent_2 = sum(grade == "2") / n() * 100,
+      percent_3 = sum(grade == "3") / n() * 100,
+      percent_4 = sum(grade == "4") / n() * 100,
+      percent_5 = sum(grade == "5") / n() * 100
+    ) #%>%
+    #mutate(class = ifelse(row_number() == 1, class, ""))  # Insert class name every 5 rows
+  
+  return(stats)
 }
