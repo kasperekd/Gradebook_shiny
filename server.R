@@ -7,7 +7,7 @@ server <- function(input, output, session)
   upload_server(input, output, session)
   editing_server(input, output, session)
 
-  #statTable_server(input, output, session)
+  statTable_server(input, output, session)
   
   
   # output$table <- renderTable({

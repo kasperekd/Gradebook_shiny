@@ -1,11 +1,14 @@
 source("editing.R")
+library("tidyr")
 
 statTable = function()
 {
   rt <- list(
     fluidRow(
+      h3("Class-wise Statistics"),
       tableOutput("classStatsTable"),
       br(),
+      h3("Overall Statistics"),
       tableOutput("overallStatsTable")
     )
   )
@@ -46,15 +49,15 @@ calculateClassStats = function(data) {
       med <- median(x)
       count <- length(x)
       percent <- mean(x > 50) * 100  # Assuming percentage of students with score > 50
-      c(avg = avg, med = med, count = count, percent = percent)
+      c(Average = avg, Median = med, Count = count, Percent = percent)
     })
     stats <- t(stats)
     colnames(stats) <- c("Average", "Median", "Count", "Percent")
     stats <- format(stats, digits = 2, nsmall = 2)
-    return(stats)
+    classStats <- data.frame(Class = as.character(subdata$class[1]), stats)
+    return(classStats)
   })
   classStats <- do.call(rbind, classStats)
-  classStats <- as.data.frame(classStats)
   return(classStats)
 }
 
@@ -65,7 +68,7 @@ calculateOverallStats = function(data) {
     med <- median(x)
     count <- length(x)
     percent <- mean(x > 50) * 100  # Assuming percentage of students with score > 50
-    c(avg = avg, med = med, count = count, percent = percent)
+    c(Average = avg, Median = med, Count = count, Percent = percent)
   })
   overallStats <- t(overallStats)
   colnames(overallStats) <- c("Average", "Median", "Count", "Percent")
