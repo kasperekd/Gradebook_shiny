@@ -7,11 +7,12 @@ statTable = function()
   rt <- list(
     fluidRow(
       column(width = 6,
-        h3("Class-wise Statistics"),
+        h3("Статистика по классам"),
         tableOutput("classStatsTable")
       ),
       column(width = 6,
-        h3("Class-wise Statistics")
+        h3("Статистика учеников"),
+        tableOutput("studentStatsTable")
       )
     )
   )
@@ -29,7 +30,8 @@ statTable_server = function(input, output, session)
       class_tables <- lapply(unique(classStats$class), function(class_name) {
         class_data <- classStats[classStats$class == class_name, ]
         total_students <- class_data$count[1]  # Используем значение count для каждого класса
-        class_table <- paste("<h4>Class:", class_name, "- Total Students:", total_students, "</h4>", kable(subset(class_data, select = -c(class, count)), "html") %>%
+        
+        class_table <- paste("<h4>Класс:", class_name, "- Всего учеников:", total_students, "</h4>", kable(subset(class_data, select = -c(class, count)), "html") %>%
                                kable_styling(full_width = F))
         if (class_name != unique(classStats$class)[length(unique(classStats$class))]) {
           class_table <- paste(class_table, " ")  # Add a horizontal line after each class table
@@ -50,16 +52,19 @@ calculateClassStats <- function(data) {
     gather(subject, grade, -name, -class) %>%
     group_by(class, subject) %>%
     summarise(
-      average = mean(as.numeric(grade), na.rm = TRUE),
-      median = median(as.numeric(grade), na.rm = TRUE),
+      `Среднее` = mean(as.numeric(grade), na.rm = TRUE),
+      `Медиана` = median(as.numeric(grade), na.rm = TRUE),
       count = n(),
-      percent_1 = sum(grade == "1") / n() * 100,
-      percent_2 = sum(grade == "2") / n() * 100,
-      percent_3 = sum(grade == "3") / n() * 100,
-      percent_4 = sum(grade == "4") / n() * 100,
-      percent_5 = sum(grade == "5") / n() * 100
+      `%1` = sum(grade == "1") / n() * 100,
+      `%2` = sum(grade == "2") / n() * 100,
+      `%3` = sum(grade == "3") / n() * 100,
+      `%4` = sum(grade == "4") / n() * 100,
+      `%5` = sum(grade == "5") / n() * 100
     ) #%>%
     #mutate(class = ifelse(row_number() == 1, class, ""))  # Insert class name every 5 rows
   
-  return(stats)
+  stats_renamed <- stats %>%
+    rename(`Предмет` = subject)
+  
+  return(stats_renamed)
 }
