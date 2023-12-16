@@ -20,10 +20,11 @@ editing <- function()
 }
 
 selected <- NULL
+dataT <- reactiveVal(NULL)
 
 editing_server <- function(input, output, session)
 {
-  dataT <- reactiveVal(NULL)
+  #dataT <- reactiveVal(NULL)
  
 
   observeEvent(input$selectButton, {
@@ -119,7 +120,7 @@ editing_server <- function(input, output, session)
   {
     selected <- paste0("./uploaded_files/", input$fileSelection)
     if (tools::file_ext(selected) %in% c("txt", "csv")) {
-      print( as.character(guess_encoding(selected)[1, "encoding"]))
+      #print( as.character(guess_encoding(selected)[1, "encoding"]))
       tryCatch({
         df <- readr::read_delim(selected, delim = ';', locale = readr::locale(encoding = as.character(guess_encoding(selected)[1, "encoding"])), show_col_types = FALSE)
       }, error = function(e) {
@@ -134,7 +135,7 @@ editing_server <- function(input, output, session)
     }
     dataT(df)
   }
-
+  
   data_to_edit <- reactive({ dataT() })  # Assign the existing table dataT to data_to_edit
   data_edit <- dataEditServer("edit_1", data = data_to_edit)
 }
