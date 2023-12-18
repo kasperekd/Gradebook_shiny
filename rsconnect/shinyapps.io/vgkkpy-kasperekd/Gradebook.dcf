@@ -1,0 +1,12 @@
+name: Gradebook
+title: Gradebook
+username: vgkkpy-kasperekd
+account: vgkkpy-kasperekd
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 10819346
+bundleId: 8061296
+url: https://vgkkpy-kasperekd.shinyapps.io/Gradebook/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

@@ -87,9 +87,7 @@ calculateClassStats <- function(data) {
       `%4` = sum(grade == "4") / n() * 100,
       `%5` = sum(grade == "5") / n() * 100,
       .groups = 'drop'
-    ) #%>%
-  #mutate(class = ifelse(row_number() == 1, class, ""))  # Insert class name every 5 rows
-  
+    ) 
   stats_renamed <- stats %>%
     rename(`Предмет` = subject)
   

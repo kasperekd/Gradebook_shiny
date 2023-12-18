@@ -8,7 +8,7 @@ server <- function(input, output, session)
   editing_server(input, output, session)
 
   statTable_server(input, output, session)
-  
+  statGraph_server(input, output, session)
   
   # output$table <- renderTable({
   #   req(input$file1)
