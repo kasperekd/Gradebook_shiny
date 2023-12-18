@@ -5,7 +5,7 @@ statGraph = function()
 {
   rt <- list(
     selectInput("classSelect", "Выбор класса", choices = NULL),
-    br(),
+    tags$hr(),
     fluidRow(
         column(6, uiOutput("plotContainer")),  
         column(6, plotOutput("subjectPlot"))   
@@ -24,20 +24,11 @@ statGraph_server = function(input, output, session)
     subject_plot <- subjectPlot(subject_stats)
     
     output$plotContainer <- renderUI({
-      plot_output_list <- lapply(seq_along(class_plots), function(i) {
-        plotOutput(paste0("plot", i))
-      })
-      plot_output_list
+      plotOutput("classPlot")
     })
     
     output$subjectPlot <- renderPlot({
       subject_plot
-    })
-    
-    lapply(seq_along(class_plots), function(i) {
-      output[[paste0("plot", i)]] <- renderPlot({
-        class_plots[[i]]
-      })
     })
     
     updateSelectInput(session, "classSelect", choices = unique(class_stats$class))
@@ -50,20 +41,19 @@ statGraph_server = function(input, output, session)
     subject_stats <- calculateSubjectStats(dataT())
     
     selected_class <- input$classSelect
-    class_index <- match(selected_class, unique(class_stats$class))
+    class_data <- subset(class_stats, class == selected_class)
+    class_plot <- ggplot(class_data, aes(x = Предмет, y = `Среднее`, fill = Предмет)) +
+      geom_bar(stat = "identity") +
+      labs(title = paste("Среднее по классу", selected_class), 
+           x = "Предмет", y = "Среднее") +
+      theme_minimal()
+    
+    output$classPlot <- renderPlot({
+      class_plot
+    })
     
     output$subjectPlot <- renderPlot({
       subjectPlot(subject_stats)
-    })
-    
-    lapply(seq_along(class_plots), function(i) {
-      output[[paste0("plot", i)]] <- renderPlot({
-        if (i == class_index) {
-          class_plots[[i]]
-        } else {
-          NULL
-        }
-      })
     })
   })
 

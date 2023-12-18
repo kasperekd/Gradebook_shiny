@@ -12,7 +12,7 @@ ui <- fluidPage(
              upload()#,
              #uiOutput("fileList")
     ),
-    tabPanel("Создание/Редактирование журнала и сохранение",
+    tabPanel("Создание/Редактирование журнала",
              editing()
     ),
     tabPanel("Статистика (Таблица)", 

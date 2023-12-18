@@ -16,6 +16,6 @@ server <- function(input, output, session)
   #   df
   # })
   
-  
+  help_P_server(input, output)
   about_server(input, output)
 }
