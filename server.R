@@ -10,12 +10,6 @@ server <- function(input, output, session)
   statTable_server(input, output, session)
   statGraph_server(input, output, session)
   
-  # output$table <- renderTable({
-  #   req(input$file1)
-  #   df <- read.csv(input$file1$datapath, sep = ';',fileEncoding = "UTF-8")
-  #   df
-  # })
-  
   help_P_server(input, output)
   about_server(input, output)
 }

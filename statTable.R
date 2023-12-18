@@ -30,12 +30,12 @@ statTable_server = function(input, output, session)
     output$classStatsTable <- renderUI({
       class_tables <- lapply(unique(classStats$class), function(class_name) {
         class_data <- classStats[classStats$class == class_name, ]
-        total_students <- class_data$count[1]  # Используем значение count для каждого класса
+        total_students <- class_data$count[1] 
         
         class_table <- paste("<h4>Класс:", class_name, "- Всего учеников:", total_students, "</h4>", kable(subset(class_data, select = -c(class, count)), "html") %>%
                                kable_styling(full_width = F))
         if (class_name != unique(classStats$class)[length(unique(classStats$class))]) {
-          class_table <- paste(class_table, " ")  # Add a horizontal line after each class table
+          class_table <- paste(class_table, " ")  
         }
         return(class_table)
       })
@@ -70,10 +70,8 @@ calculateSubjectStats <- function(data) {
 }
 
 calculateClassStats <- function(data) {
-  # Преобразование входных данных в удобный формат
   data_df <- as.data.frame(data, stringsAsFactors = FALSE)
   
-  # Расчет статистики для каждого класса и предмета
   stats <- data_df %>%
     gather(subject, grade, -name, -class) %>%
     group_by(class, subject) %>%

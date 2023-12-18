@@ -25,7 +25,6 @@ dataT <- reactiveVal(NULL)
 editing_server <- function(input, output, session)
 {
   #dataT <- reactiveVal(NULL)
- 
 
   observeEvent(input$selectButton, {
     tryCatch({
@@ -49,13 +48,11 @@ editing_server <- function(input, output, session)
       paste("edited_file", tools::file_ext(input$fileSelection), sep = ".")
     },
     content = function(file) {
-      edited_data <- data_edit()  # Получение измененных данных
-      #edited_data <- dataT()  # Получение измененных данных
+      edited_data <- data_edit()  
       if (tools::file_ext(input$fileSelection) %in% c("txt", "csv")) {
-        write.table(edited_data, file, sep = ";", row.names = FALSE, col.names = TRUE, quote = FALSE)  # Сохранение измененных данных в файл
+        write.table(edited_data, file, sep = ";", row.names = FALSE, col.names = TRUE, quote = FALSE) 
         #write.table(edited_data, file, sep = ";", row.names = FALSE, col.names = TRUE, quote = FALSE, fileEncoding = as.character(guess_encoding(selected)[1, "encoding"]))  # Сохранение измененных данных в файл
       } else if (tools::file_ext(input$fileSelection) == "xlsx") {
-        #write.xlsx(edited_data, file, row.names = FALSE)  # Сохранение измененных данных в файл
         openxlsx::write.xlsx(edited_data, file.path("./uploaded_files", file_name))
       }
     }
@@ -63,10 +60,10 @@ editing_server <- function(input, output, session)
   
   observeEvent(input$saveButton, {
     if (!is.null(input$fileSelection)) {
-      edited_data <- data_edit()  # Получение измененных данных
-      file_name <- basename(input$fileSelection)  # Получение изначального имени файла
+      edited_data <- data_edit() 
+      file_name <- basename(input$fileSelection)
       if (tools::file_ext(file_name) %in% c("txt", "csv")) {
-        write.table(edited_data, file.path("./uploaded_files", file_name), sep = ";", row.names = FALSE, col.names = TRUE, quote = FALSE)  # Сохранение измененных данных в файл
+        write.table(edited_data, file.path("./uploaded_files", file_name), sep = ";", row.names = FALSE, col.names = TRUE, quote = FALSE)
       } else if (tools::file_ext(file_name) == "xlsx") {
         openxlsx::write.xlsx(edited_data, file.path("./uploaded_files", file_name))
         #write.xlsx(edited_data, file.path("./uploaded_files", file_name), row.names = FALSE)  # Сохранение измененных данных в файл
@@ -136,6 +133,6 @@ editing_server <- function(input, output, session)
     dataT(df)
   }
   
-  data_to_edit <- reactive({ dataT() })  # Assign the existing table dataT to data_to_edit
+  data_to_edit <- reactive({ dataT() })  
   data_edit <- dataEditServer("edit_1", data = data_to_edit)
 }

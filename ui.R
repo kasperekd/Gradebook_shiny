@@ -3,10 +3,7 @@
 source("sources.R")
 
 ui <- fluidPage(
-  # Заголовок приложения
   titlePanel("Журнал"),
-  
-  # Вкладки
   tabsetPanel(
     tabPanel("Загрузка оценок", 
              upload()#,
@@ -27,8 +24,7 @@ ui <- fluidPage(
              help_P()
     ),
     tabPanel("О программе", 
-             sliderInput("scale", "Масштаб", min = 1, max = 10, value = 5),
-             plotOutput("zoom_plot")
+             about()
     )
   )
 )
