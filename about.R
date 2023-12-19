@@ -40,13 +40,4 @@ about_server = function(input, output)
   output$meImg <- renderUI({
     tags$img(src = "itsme.jpg", width = 300, height = 300)
   })
-  
-  # outputOptions(output, "gameCanvas", suspendWhenHidden = FALSE)
-  
-  # observeEvent(input$startPong, {
-  #   output$gameCanvas <- renderUI({
-  #     tags$canvas(id = "gameCanvas", width = 800, height = 400)
-  #   })
-  # })
-  
 }

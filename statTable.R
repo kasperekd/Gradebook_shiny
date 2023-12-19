@@ -6,11 +6,11 @@ statTable = function()
 {
   rt <- list(
     fluidRow(
-      column(width = 6, style="min-width: 49vw; max-width: 50vw;",
+      column(width = 6, style="min-width: 40vw; max-width: 50vw;",
              h3("Статистика по классам"),
              tableOutput("classStatsTable")
       ),
-      column(width = 6, style="min-width: 49vw; max-width: 50vw;",
+      column(width = 6, style="min-width: 40vw; max-width: 50vw;",
              h3("Статистика по предметам"),
              tableOutput("subjectStatsTable")
       )
