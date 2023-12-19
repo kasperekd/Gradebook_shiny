@@ -6,11 +6,11 @@ statTable = function()
 {
   rt <- list(
     fluidRow(
-      column(width = 6, style="min-width: 40vw; max-width: 50vw;",
+      column(width = 6, style="min-width: 20vw; max-width: 30vw;",
              h3("Статистика по классам"),
              tableOutput("classStatsTable")
       ),
-      column(width = 6, style="min-width: 40vw; max-width: 50vw;",
+      column(width = 6, style="min-width: 20vw; max-width: 30vw;",
              h3("Статистика по предметам"),
              tableOutput("subjectStatsTable")
       )
@@ -57,13 +57,13 @@ calculateSubjectStats <- function(data) {
     gather(subject, grade, -name, -class) %>%
     group_by(subject) %>%
     summarise(
-      `Средняя оценка` = mean(as.numeric(grade), na.rm = TRUE),
-      `Медианная оценка` = median(as.numeric(grade), na.rm = TRUE),
-      `%1` = sum(grade == "1") / n() * 100,
-      `%2` = sum(grade == "2") / n() * 100,
-      `%3` = sum(grade == "3") / n() * 100,
-      `%4` = sum(grade == "4") / n() * 100,
-      `%5` = sum(grade == "5") / n() * 100
+      `Средняя оценка` = round(mean(as.numeric(grade), na.rm = TRUE), digits = 2),
+      `Медианная оценка` = round(median(as.numeric(grade), na.rm = TRUE), digits = 2),
+      `%1` = round(sum(grade == "1") / n() * 100, digits = 2),
+      `%2` = round(sum(grade == "2") / n() * 100, digits = 2),
+      `%3` = round(sum(grade == "3") / n() * 100, digits = 2),
+      `%4` = round(sum(grade == "4") / n() * 100, digits = 2),
+      `%5` = round(sum(grade == "5") / n() * 100, digits = 2)
     )
   
   return(subject_stats)
