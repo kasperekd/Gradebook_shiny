@@ -162,9 +162,13 @@ editing_server <- function(input, output, session)
     }
   }
   
-  observe({
-    req(input$classSelect)
     data_to_edit <- reactive({ dataT() })  
     data_edit <- dataEditServer("edit_1", data = data_to_edit)
-  })
+    
+    # observe({
+    #   req(input$classSelect)
+    #   data_to_edit <- reactive({ dataT() })  
+    #   data_edit <- dataEditServer("edit_1", data = data_to_edit)
+    # })
+
 }
